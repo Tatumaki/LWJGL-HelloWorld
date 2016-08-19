@@ -10,12 +10,18 @@ import static org.lwjgl.system.MemoryUtil.*;
 import java.util.Arrays;
 
 public class Main {
-
   // The window handle
   private long window;
   private int WIDTH = 1280;
   private int HEIGHT = 1024;
   private long variableYieldTime, lastTime;
+
+  private Entity entity;
+
+  private int count = 0;
+
+  private float x = 640;
+  private float y = 480;
 
   public Main(){
   }
@@ -35,6 +41,9 @@ public class Main {
       glfwTerminate();
       glfwSetErrorCallback(null).free();
     }
+  }
+
+  private void initGame(){
   }
 
   private void init() {
@@ -79,6 +88,8 @@ public class Main {
 
     // Make the window visible
     glfwShowWindow(window);
+
+    initGame();
   }
 
   private void loop() {
@@ -89,27 +100,36 @@ public class Main {
     // bindings available for use.
     GL.createCapabilities();
 
+    // 2D描画をオンにする
+    glEnable(GL_TEXTURE_2D);
+
     //  ポリゴンの片面（表 or 裏）表示を有効にする
     glEnable(GL_CULL_FACE);
     //  ポリゴンの表示面を表（裏を表示しない）のみに設定する
     glCullFace(GL_BACK);
        
-    glMatrixMode(GL_PROJECTION);
+    // glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     //  視体積（描画する領域）を定義する
     glOrtho(0, WIDTH, 0, HEIGHT, 0, 300);
     glMatrixMode(GL_MODELVIEW);
+
+    entity = new Entity();
+    entity.load("./res/image.png");
+
+    Controller.register(entity);
 
     // Run the rendering loop until the user has attempted to close
     // the window or has pressed the ESCAPE key.
     while ( !glfwWindowShouldClose(window) ) {
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
 
+      update();
+
       // Poll for window events. The key callback above will only be
       // invoked during this call.
       glfwPollEvents();
 
-      update();
       render();
       sync(60);
 
@@ -166,42 +186,26 @@ public class Main {
 
   private void update(){
     ++count;
-  }
 
-  private int count = 0;
+    if(glfwGetKey(window, GLFW_KEY_A)  == GL_TRUE ){
+      Controller.keyPressed(GLFW_KEY_A);
+    }
+    if(glfwGetKey(window, GLFW_KEY_D)  == GL_TRUE ){
+      Controller.keyPressed(GLFW_KEY_D);
+    }
+    if(glfwGetKey(window, GLFW_KEY_W)  == GL_TRUE ){
+      Controller.keyPressed(GLFW_KEY_W);
+    }
+    if(glfwGetKey(window, GLFW_KEY_S)  == GL_TRUE ){
+      Controller.keyPressed(GLFW_KEY_S);
+    }
+  }
 
   private void render(){
     // // Set the clear color
     // glClearColor(0.5f, 0.5f, 0.0f, 0.0f);
-
-    //  次に指定する４つの座標を、描く四角形の頂点として認識させる
-    glBegin(GL_QUADS);
-
-    float width_range = WIDTH / 2.0f;
-    float height_range = HEIGHT / 2.0f;
-
-    float sin = (float)Math.sin(Math.toRadians(count));
-    float cos = (float)Math.cos(Math.toRadians(count));
-
-    //  OpenGL では頂点が左回りになっているのがポリゴンの表となる
-    //  今は表のみ表示する設定にしているので、頂点の方向を反対にすると裏側となり、表示されなくなる
     
-    glColor3f(1.0f, 0.5f, 0.5f);            //  次に指定する座標に RGB で色を設定する
-    glVertex3f(width_range + width_range * cos + width_range / 2.0f, height_range + height_range * sin + height_range / 2.0f, 0);  //  1 つめの座標を指定する
-
-    glColor3f(0.5f, 1.0f, 0.5f);
-    // glVertex3f(50, HEIGHT - 50, 0);      // 2 つめの座標を指定する
-    glVertex3f(width_range - width_range * cos - width_range / 2.0f, height_range + height_range * sin + height_range / 2.0f, 0);  //  1 つめの座標を指定する
-       
-    glColor3f(0.5f, 0.5f, 1.0f);
-    // glVertex3f(50, 50, 0);                //    3 つめの座標を指定する
-    glVertex3f(width_range - width_range * cos - width_range / 2.0f, height_range - height_range * sin - height_range / 2.0f, 0);  //  1 つめの座標を指定する
-       
-    glColor3f(1.0f, 1.0f, 1.0f);
-    // glVertex3f(WIDTH - 50, 50, 0);        //    4 つめの座標を指定する
-    glVertex3f(width_range + width_range * cos + width_range / 2.0f, height_range - height_range * sin - height_range / 2.0f, 0);  //  1 つめの座標を指定する
-
-    glEnd();
+    entity.draw();
   }
 
   public static void main(String[] args) {

@@ -23,6 +23,7 @@ public class Main {
   private Matrix4f projection;
   private Matrix4f scale;
   private Matrix4f target;
+  private Camera camera = new Camera(WIDTH, HEIGHT);
 
   private int count = 0;
 
@@ -124,10 +125,10 @@ public class Main {
     shader = new Shader("shader");
     // center of monitor.
     projection = new Matrix4f().ortho2D(-1280/2.0f, 1280/2.0f, -1024/2.0f, 1024/2.0f);
-    scale      = new Matrix4f().scale(64);
+    scale      = new Matrix4f().translate(new Vector3f(100, 0, 0)).scale(64);
     target     = new Matrix4f();
 
-    projection.mul(scale, target);
+    camera.setPosition(new Vector3f(-100,0,0));
 
     entity = new Entity();
     entity.texture.load("./res/image.png");
@@ -156,6 +157,8 @@ public class Main {
     // the window or has pressed the ESCAPE key.
     while ( !glfwWindowShouldClose(window) ) {
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
+
+      target = scale;
 
       update();
 
@@ -240,7 +243,7 @@ public class Main {
     
     shader.bind();
     shader.setUniform("sampler", 0);
-    shader.setUniform("projection", target);
+    shader.setUniform("projection", camera.getProjection().mul(target));
 
     entity.draw();
   }

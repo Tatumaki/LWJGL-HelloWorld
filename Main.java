@@ -20,8 +20,9 @@ public class Main {
 
   private int count = 0;
 
-  private float x = 640;
-  private float y = 480;
+  public static void main(String[] args) {
+    new Main().run();
+  }
 
   public Main(){
   }
@@ -56,9 +57,9 @@ public class Main {
       throw new IllegalStateException("Unable to initialize GLFW");
 
     // Configure our window
-    glfwDefaultWindowHints(); // optional, the current window hints are already the default
-    glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE); // the window will stay hidden after creation
-    glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE); // the window will be resizable
+    // glfwDefaultWindowHints(); // optional, the current window hints are already the default
+    // glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE); // the window will stay hidden after creation
+    // glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE); // the window will be resizable
 
 
     // Create the window
@@ -92,6 +93,8 @@ public class Main {
     initGame();
   }
 
+  Shader shader;
+
   private void loop() {
     // This line is critical for LWJGL's interoperation with GLFW's
     // OpenGL context, or any context that is managed externally.
@@ -103,19 +106,39 @@ public class Main {
     // 2D描画をオンにする
     glEnable(GL_TEXTURE_2D);
 
-    //  ポリゴンの片面（表 or 裏）表示を有効にする
-    glEnable(GL_CULL_FACE);
+    // ポリゴンの片面（表 or 裏）表示を有効にする
+    // glEnable(GL_CULL_FACE);
     //  ポリゴンの表示面を表（裏を表示しない）のみに設定する
-    glCullFace(GL_BACK);
+    // glCullFace(GL_BACK);
        
-    // glMatrixMode(GL_PROJECTION);
+    glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    //  視体積（描画する領域）を定義する
-    glOrtho(0, WIDTH, 0, HEIGHT, 0, 300);
+    // 視体積（描画する領域）を定義する
+    // glOrtho(0, WIDTH, 0, HEIGHT, 0, 300);
     glMatrixMode(GL_MODELVIEW);
 
+    shader = new Shader("shader");
+
     entity = new Entity();
-    entity.load("./res/image.png");
+    entity.texture.load("./res/image.png");
+    entity.model.load(
+      new float[] {
+        -1.0f, 1.0f, 0, //TOP LEFT      0
+         1.0f, 1.0f, 0, //TOP RIGHT     1
+         1.0f,-1.0f, 0, //BUTTOM RIGHT  2
+        -1.0f,-1.0f, 0, //BOTTOM LEFT   3
+      },
+      new float[] {
+        0,0, // 0
+        1,0, // 1
+        1,1, // 2
+        0,1, // 3
+      },
+      new int[] {
+        0,1,2,
+        2,3,0
+      }
+    );
 
     Controller.register(entity);
 
@@ -205,10 +228,10 @@ public class Main {
     // // Set the clear color
     // glClearColor(0.5f, 0.5f, 0.0f, 0.0f);
     
+    shader.bind();
+    shader.setUniform("sampler", 0);
+
     entity.draw();
   }
 
-  public static void main(String[] args) {
-    new Main().run();
-  }
 };

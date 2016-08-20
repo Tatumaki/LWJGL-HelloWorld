@@ -1,7 +1,8 @@
 import static org.lwjgl.glfw.GLFW.*;
 
-public class Entity extends Drawable implements Controllable {
+public class Entity implements Controllable {
   public Texture texture = new Texture();
+  public Model   model   = new Model();
   public Point   point   = new Point();
 
   @Override
@@ -25,7 +26,9 @@ public class Entity extends Drawable implements Controllable {
   }
 
   public void draw(){
-    this.draw(point.x, point.y);
+    this.texture.bind(0);
+    this.model.render();
+
     // System.out.println("its drown on ("+String.valueOf(point.x)+","+String.valueOf(point.y)+"), could you see it?");
   }
 }

@@ -1,5 +1,5 @@
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL11.glTexCoord2f;
+import static org.lwjgl.opengl.GL13.*;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -54,8 +54,11 @@ public class Texture {
     }
   }
 
-  public void bind(){
-    glBindTexture(GL_TEXTURE_2D, id);
+  public void bind(int sampler){
+    if(sampler >= 0 && sampler <= 31){
+      glActiveTexture(GL_TEXTURE0 + sampler); // bind the selected texture
+      glBindTexture(GL_TEXTURE_2D, id);
+    }
   }
 
   public int width(){

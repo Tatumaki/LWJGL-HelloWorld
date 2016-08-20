@@ -9,6 +9,8 @@ import static org.lwjgl.system.MemoryUtil.*;
 
 import java.util.Arrays;
 
+import org.joml.*;
+
 public class Main {
   // The window handle
   private long window;
@@ -17,6 +19,10 @@ public class Main {
   private long variableYieldTime, lastTime;
 
   private Entity entity;
+  private Shader shader;
+  private Matrix4f projection;
+  private Matrix4f scale;
+  private Matrix4f target;
 
   private int count = 0;
 
@@ -93,8 +99,6 @@ public class Main {
     initGame();
   }
 
-  Shader shader;
-
   private void loop() {
     // This line is critical for LWJGL's interoperation with GLFW's
     // OpenGL context, or any context that is managed externally.
@@ -118,6 +122,12 @@ public class Main {
     glMatrixMode(GL_MODELVIEW);
 
     shader = new Shader("shader");
+    // center of monitor.
+    projection = new Matrix4f().ortho2D(-1280/2.0f, 1280/2.0f, -1024/2.0f, 1024/2.0f);
+    scale      = new Matrix4f().scale(64);
+    target     = new Matrix4f();
+
+    projection.mul(scale, target);
 
     entity = new Entity();
     entity.texture.load("./res/image.png");
@@ -230,6 +240,7 @@ public class Main {
     
     shader.bind();
     shader.setUniform("sampler", 0);
+    shader.setUniform("projection", target);
 
     entity.draw();
   }

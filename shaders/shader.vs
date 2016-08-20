@@ -5,7 +5,9 @@ attribute  vec2 textures;
 
 varying vec2 tex_coords;
 
+uniform mat4 projection; //mat4 is eq to matrix4fv
+
 void  main() {
-  tex_coords = textures;
-  gl_Position = vec4(vertices, 1);
+  tex_coords  = textures;
+  gl_Position = projection * vec4(vertices, 1);
 }

@@ -1,10 +1,15 @@
 import static org.lwjgl.opengl.GL20.*;
 
+import org.lwjgl.BufferUtils;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 
+import java.nio.FloatBuffer;
+
+import org.joml.*;
 
 public class Shader {
   private int program;
@@ -55,10 +60,19 @@ public class Shader {
     glUseProgram(program);
   }
 
-  public void setUniform(String name, float value){
+  public void setUniform(String name, int value){
     int location = glGetUniformLocation(program, name);
     if(location != -1){
-      glUniform1f(location, value);
+      glUniform1i(location, value);
+    }
+  }
+
+  public void setUniform(String name, Matrix4f value){
+    int location = glGetUniformLocation(program, name);
+    FloatBuffer buffer = BufferUtils.createFloatBuffer(16); //scale, translation, rotation.
+    value.get(buffer);
+    if(location != -1){
+      glUniformMatrix4fv(location, false, buffer);
     }
   }
 

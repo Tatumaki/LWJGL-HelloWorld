@@ -13,16 +13,17 @@ import org.joml.*;
 
 public class Main {
   // The window handle
-  private long window;
   private int WIDTH = 1280;
   private int HEIGHT = 1024;
+
+  private Window window = new Window();
 
   private Entity entity;
   private Shader shader;
   private Matrix4f projection;
   private Matrix4f scale;
   private Matrix4f target;
-  private Camera camera = new Camera(WIDTH, HEIGHT);
+  private Camera camera;
 
   private int count = 0;
 
@@ -40,9 +41,7 @@ public class Main {
       init();
       loop();
 
-      // Free the window callbacks and destroy the window
-      glfwFreeCallbacks(window);
-      glfwDestroyWindow(window);
+      window.destroy();
     } finally {
       // Terminate GLFW and free the error callback
       glfwTerminate();
@@ -59,42 +58,31 @@ public class Main {
     GLFWErrorCallback.createPrint(System.err).set();
 
     // Initialize GLFW. Most GLFW functions will not work before doing this.
-    if ( !glfwInit() )
+    if ( !glfwInit() ) {
       throw new IllegalStateException("Unable to initialize GLFW");
+    }
+
+    window.setSize(WIDTH, HEIGHT);
+    window.setFullscreen(true);
+    window.createWindow("Game");
+    window.setWindowPositionCentor();
+
+    camera = new Camera(window.getWidth(), window.getHeight());
 
     // Configure our window
     // glfwDefaultWindowHints(); // optional, the current window hints are already the default
     // glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE); // the window will stay hidden after creation
     // glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE); // the window will be resizable
 
-
-    // Create the window
-    window = glfwCreateWindow(WIDTH, HEIGHT, "Hello World!", NULL, NULL);
-    if ( window == NULL )
-      throw new RuntimeException("Failed to create the GLFW window");
-
     // Setup a key callback. It will be called every time a key is pressed, repeated or released.
-    glfwSetKeyCallback(window, (window, key, scancode, action, mods) -> {
+    //
+    glfwSetKeyCallback(window.getWindow(), (window, key, scancode, action, mods) -> {
       if ( key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE )
         glfwSetWindowShouldClose(window, true); // We will detect this in our rendering loop
     });
 
-    // Get the resolution of the primary monitor
-    GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-    // Center our window
-    glfwSetWindowPos(
-      window,
-      (vidmode.width() - WIDTH) / 2,
-      (vidmode.height() - HEIGHT) / 2
-    );
-
-    // Make the OpenGL context current
-    glfwMakeContextCurrent(window);
     // Enable v-sync
     glfwSwapInterval(1);
-
-    // Make the window visible
-    glfwShowWindow(window);
 
     initGame();
   }
@@ -154,7 +142,7 @@ public class Main {
 
     // Run the rendering loop until the user has attempted to close
     // the window or has pressed the ESCAPE key.
-    while ( !glfwWindowShouldClose(window) ) {
+    while ( window.shouldClose() ) {
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
 
       target = scale;
@@ -168,25 +156,25 @@ public class Main {
       render();
       Syncer.sync(60);
 
-      glfwSwapBuffers(window); // swap the color buffers
+      window.swapBuffers();
     }
   }
 
   private void update(){
     ++count;
 
-    if(glfwGetKey(window, GLFW_KEY_A)  == GL_TRUE ){
-      Controller.keyPressed(GLFW_KEY_A);
-    }
-    if(glfwGetKey(window, GLFW_KEY_D)  == GL_TRUE ){
-      Controller.keyPressed(GLFW_KEY_D);
-    }
-    if(glfwGetKey(window, GLFW_KEY_W)  == GL_TRUE ){
-      Controller.keyPressed(GLFW_KEY_W);
-    }
-    if(glfwGetKey(window, GLFW_KEY_S)  == GL_TRUE ){
-      Controller.keyPressed(GLFW_KEY_S);
-    }
+    // if(glfwGetKey(window, GLFW_KEY_A)  == GL_TRUE ){
+    //   Controller.keyPressed(GLFW_KEY_A);
+    // }
+    // if(glfwGetKey(window, GLFW_KEY_D)  == GL_TRUE ){
+    //   Controller.keyPressed(GLFW_KEY_D);
+    // }
+    // if(glfwGetKey(window, GLFW_KEY_W)  == GL_TRUE ){
+    //   Controller.keyPressed(GLFW_KEY_W);
+    // }
+    // if(glfwGetKey(window, GLFW_KEY_S)  == GL_TRUE ){
+    //   Controller.keyPressed(GLFW_KEY_S);
+    // }
   }
 
   private void render(){

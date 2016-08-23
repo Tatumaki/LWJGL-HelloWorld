@@ -8,6 +8,15 @@ public class Window {
   private int width, height;
   private boolean fullscreen;
 
+  public static void setCallbacks() {
+    glfwSetErrorCallback(new GLFWErrorCallback() {
+      @Override 
+      public void invoke(int error, long description){
+        throw new IllegalStateException( GLFWErrorCallback.getDescription(description));
+      }
+    });
+  }
+
   public Window(){
     setSize(640,480);
     setFullscreen(false);

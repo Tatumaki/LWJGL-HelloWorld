@@ -32,6 +32,7 @@ public class Main {
   }
 
   public Main(){
+    Window.setCallbacks();
   }
 
   public void run() {
@@ -63,7 +64,7 @@ public class Main {
     }
 
     window.setSize(WIDTH, HEIGHT);
-    window.setFullscreen(true);
+    window.setFullscreen(false);
     window.createWindow("Game");
     window.setWindowPositionCentor();
 

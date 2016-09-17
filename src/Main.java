@@ -13,19 +13,16 @@ import org.joml.*;
 
 public class Main {
   // The window handle
-  private int WIDTH = 1280;
-  private int HEIGHT = 1024;
-
-  private Window window = new Window();
-
-  private Entity entity;
-  private Shader shader;
-  private Matrix4f projection;
-  private Matrix4f scale;
-  private Matrix4f target;
-  private Camera camera;
+  private int WIDTH = 640;
+  private int HEIGHT = 480;
 
   private int count = 0;
+  private Window window;
+
+  private Shader shader;
+  private Camera camera;
+
+  private World world;
 
   public static void main(String[] args) {
     new Main().run();
@@ -51,6 +48,14 @@ public class Main {
   }
 
   private void initGame(){
+    world  = new World(window);
+    camera = new Camera(window.getWidth(), window.getHeight());
+
+    // Setup a key callback. It will be called every time a key is pressed, repeated or released.
+    glfwSetKeyCallback(window.getWindow(), (window, key, scancode, action, mods) -> {
+      if ( key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE )
+        glfwSetWindowShouldClose(window, true); // We will detect this in our rendering loop
+    });
   }
 
   private void init() {
@@ -63,32 +68,12 @@ public class Main {
       throw new IllegalStateException("Unable to initialize GLFW");
     }
 
+    window = new Window();
     window.setSize(WIDTH, HEIGHT);
     window.setFullscreen(false);
     window.createWindow("Game");
     window.setWindowPositionCentor();
 
-    camera = new Camera(window.getWidth(), window.getHeight());
-
-    // Configure our window
-    // glfwDefaultWindowHints(); // optional, the current window hints are already the default
-    // glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE); // the window will stay hidden after creation
-    // glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE); // the window will be resizable
-
-    // Setup a key callback. It will be called every time a key is pressed, repeated or released.
-    //
-    glfwSetKeyCallback(window.getWindow(), (window, key, scancode, action, mods) -> {
-      if ( key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE )
-        glfwSetWindowShouldClose(window, true); // We will detect this in our rendering loop
-    });
-
-    // Enable v-sync
-    glfwSwapInterval(1);
-
-    initGame();
-  }
-
-  private void loop() {
     // This line is critical for LWJGL's interoperation with GLFW's
     // OpenGL context, or any context that is managed externally.
     // LWJGL detects the context that is current in the current thread,
@@ -110,50 +95,32 @@ public class Main {
     // glOrtho(0, WIDTH, 0, HEIGHT, 0, 300);
     glMatrixMode(GL_MODELVIEW);
 
+    // Shaderの読み込み
     shader = new Shader("shader");
-    // center of monitor.
-    projection = new Matrix4f().ortho2D(-1280/2.0f, 1280/2.0f, -1024/2.0f, 1024/2.0f);
-    scale      = new Matrix4f().translate(new Vector3f(100, 0, 0)).scale(64);
-    target     = new Matrix4f();
 
-    camera.setPosition(new Vector3f(-100,0,0));
+    Syncer.setUp(60);
 
-    entity = new Entity();
-    entity.texture.load("./res/image.png");
-    entity.model.load(
-      new float[] {
-        -1.0f, 1.0f, 0, //TOP LEFT      0
-         1.0f, 1.0f, 0, //TOP RIGHT     1
-         1.0f,-1.0f, 0, //BUTTOM RIGHT  2
-        -1.0f,-1.0f, 0, //BOTTOM LEFT   3
-      },
-      new float[] {
-        0,0, // 0
-        1,0, // 1
-        1,1, // 2
-        0,1, // 3
-      },
-      new int[] {
-        0,1,2,
-        2,3,0
-      }
-    );
+    initGame();
 
-    Controller.register(entity);
+    // Configure our window
+    // glfwDefaultWindowHints(); // optional, the current window hints are already the default
+    // glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE); // the window will stay hidden after creation
+    // glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE); // the window will be resizable
 
+    // Enable v-sync
+    glfwSwapInterval(1);
+  }
+
+  private void loop() {
     // Run the rendering loop until the user has attempted to close
     // the window or has pressed the ESCAPE key.
     while ( window.shouldClose() ) {
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
 
-      target = scale;
-
       update();
 
-      // Poll for window events. The key callback above will only be
-      // invoked during this call.
-      glfwPollEvents();
-
+      window.update();
+      
       render();
       Syncer.sync(60);
 
@@ -164,29 +131,18 @@ public class Main {
   private void update(){
     ++count;
 
-    // if(glfwGetKey(window, GLFW_KEY_A)  == GL_TRUE ){
-    //   Controller.keyPressed(GLFW_KEY_A);
-    // }
-    // if(glfwGetKey(window, GLFW_KEY_D)  == GL_TRUE ){
-    //   Controller.keyPressed(GLFW_KEY_D);
-    // }
-    // if(glfwGetKey(window, GLFW_KEY_W)  == GL_TRUE ){
-    //   Controller.keyPressed(GLFW_KEY_W);
-    // }
-    // if(glfwGetKey(window, GLFW_KEY_S)  == GL_TRUE ){
-    //   Controller.keyPressed(GLFW_KEY_S);
-    // }
+    camera.update(window.getInput());
+    
+    if(count % 60 == 0){
+      System.out.println("FPS: "+ String.valueOf(Syncer.currentFps()));
+    }
   }
 
   private void render(){
-    // // Set the clear color
+    // Set the clear color
     // glClearColor(0.5f, 0.5f, 0.0f, 0.0f);
-    
-    shader.bind();
-    shader.setUniform("sampler", 0);
-    shader.setUniform("projection", camera.getProjection().mul(target));
-
-    entity.draw();
+   
+    world.update();
+    world.render(shader, camera);
   }
-
 };

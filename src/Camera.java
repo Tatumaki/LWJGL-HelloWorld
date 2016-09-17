@@ -6,7 +6,7 @@ import java.util.function.*;
 
 import static org.lwjgl.glfw.GLFW.*;
 
-public class Camera implements Bindable{
+public class Camera {
   private Vector3f position;
   private Matrix4f projection;
 

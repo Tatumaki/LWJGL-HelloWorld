@@ -1,6 +1,26 @@
 
+import java.util.Arrays;
+
 public final class Syncer {
   private static long variableYieldTime, lastTime;
+  private static long[] times = new long[60];
+
+  private static int fps = 60;
+  private static int index = 0;
+
+  public static void setUp(final int fps){
+    times    = new long[fps];
+    Syncer.fps = fps;
+    Arrays.fill(times,0);
+  }
+
+  public static double currentFps(){
+    long sum = 0;
+    for(long time: times){
+      sum += time;
+    }
+    return 1000.0 / (sum / (double)(fps) / 1000000.0);
+  }
 
   public static void sync(int fps) {
     if (fps <= 0) return;
@@ -9,10 +29,11 @@ public final class Syncer {
     // yieldTime + remainder micro & nano seconds if smaller than sleepTime
     long yieldTime = Math.min(sleepTime, variableYieldTime + sleepTime % (1000*1000));
     long overSleep = 0; // time the sync goes over by
+    long t;
       
     try {
       while (true) {
-        long t = System.nanoTime() - lastTime;
+        t = System.nanoTime() - lastTime;
 
         if (t < sleepTime - yieldTime) {
           Thread.sleep(1);
@@ -24,6 +45,9 @@ public final class Syncer {
           break; // exit while loop
         }
       }
+
+      times[index] = t;
+      index = (index + 1) % fps;
     } catch (InterruptedException e) {
       e.printStackTrace();
     }finally{

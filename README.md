@@ -12,6 +12,18 @@ LWJGLを使ってみたかった。
 Ubuntuマシンにセットアップして動作させたかった。
 無事動いた。
 
+# Setup
+
+普段はVimで開発しているので、build.shとrun.shで実行までを行っている。  
+
+1. 好きな場所にJava用のライブラリを置いておく場所を作る
+  - 例: ~/java/lib
+2. `$JAVA_LIB_PATH` にそのパスを設定する（.bashrcなどに書き込んでおくと楽）
+  - 例: `export JAVA_LIB_PATH=~/java/lib`
+3. その中にLWJGLの公式からダウンロードして解凍したファイルをそのまま設置する
+  - `$JAVA_LIB_PATH/lwjgl/jar/lwjgl.jar` でアクセスできるようになっていればOK
+4. `./build.sh && ./run.sh` でビルド＆実行する
+
 
 # Environment
 

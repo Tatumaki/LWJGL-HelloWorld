@@ -1,7 +1,12 @@
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
+import org.lwjgl.glfw.*;
 
-public class Camera {
+import java.util.function.*;
+
+import static org.lwjgl.glfw.GLFW.*;
+
+public class Camera implements Bindable{
   private Vector3f position;
   private Matrix4f projection;
 
@@ -28,5 +33,20 @@ public class Camera {
 
     target = projection.mul(pos, target);
     return target;
+  }
+
+  public void update(Input input){
+    input.isKeyPressed(GLFW_KEY_W, () -> {
+      getPosition().sub(new Vector3f(0,1,0));
+    });
+    input.isKeyPressed(GLFW_KEY_S, () -> {
+      getPosition().sub(new Vector3f(0,-1,0));
+    });
+    input.isKeyPressed(GLFW_KEY_D, () -> {
+      getPosition().sub(new Vector3f(1,0,0));
+    });
+    input.isKeyPressed(GLFW_KEY_A, () -> {
+      getPosition().sub(new Vector3f(-1,0,0));
+    });
   }
 }

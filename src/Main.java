@@ -114,23 +114,18 @@ public class Main {
   private void loop() {
     // Run the rendering loop until the user has attempted to close
     // the window or has pressed the ESCAPE key.
-    while ( window.shouldClose() ) {
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
-
+    while ( !window.shouldClose() ) {
       update();
-
-      window.update();
-      
       render();
-      Syncer.sync(60);
 
-      window.swapBuffers();
+      Syncer.sync(60);
     }
   }
 
   private void update(){
     ++count;
 
+    window.update();
     camera.update(window.getInput());
     
     if(count % 60 == 0){
@@ -139,10 +134,11 @@ public class Main {
   }
 
   private void render(){
-    // Set the clear color
-    // glClearColor(0.5f, 0.5f, 0.0f, 0.0f);
-   
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
+
     world.update();
     world.render(shader, camera);
+
+    window.swapBuffers();
   }
 };

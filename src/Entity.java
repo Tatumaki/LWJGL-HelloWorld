@@ -1,9 +1,13 @@
 import static org.lwjgl.glfw.GLFW.*;
 import org.joml.*;
 
-public class Entity implements Controllable {
-  public Texture texture = new Texture();
-  public Model   model   = new Model();
+public class Entity {
+  public Image image;
+
+  public void loadImage(String file){
+    this.image = new Image(file);
+  }
+
   private Vector3f position;
 
   public Entity() {
@@ -18,8 +22,19 @@ public class Entity implements Controllable {
     return this.position = position;
   }
 
-  @Override
-  public void onKeyPress(int key){
+  public void updateInput(Input input) {
+    input.isKeyPressed(GLFW_KEY_UP, () -> {
+      addPosition(new Vector3f(0,1,0));
+    });
+    input.isKeyPressed(GLFW_KEY_DOWN, () -> {
+      addPosition(new Vector3f(0,-1,0));
+    });
+    input.isKeyPressed(GLFW_KEY_LEFT, () -> {
+      addPosition(new Vector3f(-1,0,0));
+    });
+    input.isKeyPressed(GLFW_KEY_RIGHT, () -> {
+      addPosition(new Vector3f(1,0,0));
+    });
   }
 
   public void draw(Shader shader, Matrix4f world, Camera camera){
@@ -34,11 +49,7 @@ public class Entity implements Controllable {
     shader.setUniform("projection", target);
     // shader.setUniform("projection", camera.getProjection().mul(target));
 
-    this.texture.bind(0);
-    shader.bind();
-    shader.setUniform("sampler", 0);
-    this.model.render();
-
+    image.render();
 
     // System.out.println("its drown on ("+String.valueOf(point.x)+","+String.valueOf(point.y)+"), could you see it?");
   }
